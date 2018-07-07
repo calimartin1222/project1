@@ -34,9 +34,19 @@ def account():
     uname = request.form.get("uname")
     pword = request.form.get("pword")
     first = request.form.get("first")
-    """return render_template("alert.html", message=uname)"""
     db.execute("INSERT INTO userinfo (first, uname, pword) VALUES (:first, :uname, :pword)",
             {"first": first, "uname": uname, "pword": pword})
 
     db.commit()
     return render_template("alert.html", message="Congrats on making your account!")
+
+@app.route("/dashboard", methods=["POST"])
+def login():
+    uname = request.form.get("uname")
+    pword = request.form.get("pword")
+
+    db.execute("SELECT userinfo (first, uname, pword) VALUES (:first, :uname, :pword)",
+            {"first": first, "uname": uname, "pword": pword})
+
+    db.commit()
+    return render_template("dash.html", user=uname)
