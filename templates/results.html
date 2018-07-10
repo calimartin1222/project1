@@ -1,6 +1,6 @@
 {% extends "template.html" %}
 {% block title %}
-    Dashboard
+    Results
 {% endblock %}
 {% block body %}
     <a align="right" href="{{ url_for('logout') }}">Logout</a>
@@ -16,4 +16,10 @@
             </div>
         </form>
     </div>
+    <h3>Search Results</h3>
+    <ul style="list-style-type: none">
+        {% for match in matches %}
+            <li><a href="/{{ match }}">{{ match }}</li>
+        {% endfor %}
+    </ul>
 {% endblock %}

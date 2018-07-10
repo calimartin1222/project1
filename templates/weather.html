@@ -3,7 +3,9 @@
     Weather
 {% endblock %}
 {% block body %}
-    <a style="text-align:right" href="{{ url_for('logout') }}">Logout</a>
-    <h1>The Weather for {{ location }}!</h1>
+    <a align="right" href="{{ url_for('logout') }}">Logout</a>
+    <h1>The Weather for {{ location }}:</h1>
     <p>{{ weatherInfo }}</p>
+
+    <a style="text-align:right" href="dash.html">Back to Search</a>
 {% endblock %}
