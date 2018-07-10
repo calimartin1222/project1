@@ -1,11 +1,9 @@
 {% extends "template.html" %}
-
 {% block title %}
     Home
 {% endblock %}
-
 {% block body %}
-<form action="{{ url_for('login') }}" method="post">>
+<form action="{{ url_for('login') }}" method="post">
   <div class="form-group">
     <input class="form-control" name="uname" placeholder="Username">
   </div>

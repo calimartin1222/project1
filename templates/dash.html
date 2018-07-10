@@ -1,13 +1,19 @@
-
 {% extends "template.html" %}
-
 {% block title %}
-    Success!
+    Dashboard
 {% endblock %}
-
 {% block body %}
-      <div class="alert alert-success" role="alert">
-        <h1>Hello, {{ message }}!</h1>
-      </div>
-      <a href="{{ url_for('index') }}">Back</a>
+    <a style="text-align:right" href="{{ url_for('logout') }}">Logout</a>
+    <h1>Hello, {{ user }}!</h1>
+
+    <div class="half">
+        <form action="{{ url_for('weather') }}" method="post" class="form-inline">
+            <div class="form-group">
+                <input class="form-control" name="location" text="text" placeholder="Enter a City or a Zipcode">
+            </div>
+            <div class="form-group">
+                <button class="btn btn-primary">Search!</button>
+            </div>
+        </form>
+    </div>
 {% endblock %}

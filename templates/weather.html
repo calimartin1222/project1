@@ -1,0 +1,9 @@
+{% extends "template.html" %}
+{% block title %}
+    Weather
+{% endblock %}
+{% block body %}
+    <a style="text-align:right" href="{{ url_for('logout') }}">Logout</a>
+    <h1>The Weather for {{ location }}!</h1>
+    <p>{{ weatherInfo }}</p>
+{% endblock %}
