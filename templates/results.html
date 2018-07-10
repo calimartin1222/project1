@@ -17,9 +17,10 @@
         </form>
     </div>
     <h3>Search Results</h3>
+    {{ matches }}
     <ul style="list-style-type: none">
         {% for match in matches %}
-            <li><a href="/{{ match }}">{{ match }}</li>
+            <li><a href="weather/{{ match }}"></a>{{ match }}</li>
         {% endfor %}
     </ul>
 {% endblock %}

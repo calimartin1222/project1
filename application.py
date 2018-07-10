@@ -61,24 +61,12 @@ def logout():
 
 @app.route("/search/results", methods=["POST"])
 def results():
-    matches=[]
     location = request.form.get("location").upper()
-    matches = db.execute("SELECT city FROM locations WHERE city = :loc OR zip = :loc;", {"loc": location}).fetchall()
-    if not matches:
-        matches = db.execute("SELECT DISTINCT(city) FROM locations WHERE city LIKE '%loc%' OR zip LIKE '%loc%';", {"loc": location}).fetchall()
-        for match in matches:
-            matches.append(match[2:(len(match)-1)])
-    if not matches:
+    matches = db.execute("SELECT city FROM locations WHERE city = :loc OR zip = :loc;", {"loc": location}).fetchone()
+    if matches is None:
+        matches = db.execute("SELECT * FROM locations WHERE zip LIKE '%loc%' OR city LIKE '%loc%';", {"loc": location}).fetchall()
+    if matches is None:
         return render_template("error.html", message="Not a valid city or zipcode")
-    if len(matches) > 1:
-        return render_template("results.html", matches=matches, userLoggedIn=userLoggedIn)
-    else:
-        return render_template("weather.html", city=location)
-
-
-@app.route("/weather", methods=["GET"])
-def weather():
-    location=location
     lat = str(db.execute("SELECT lat FROM locations WHERE city = :loc OR zip = :loc", {"loc": location}).fetchone())
     longi = str(db.execute("SELECT long FROM locations WHERE city = :loc OR zip = :loc", {"loc": location}).fetchone())
     if lat[2] == "-":
@@ -90,6 +78,6 @@ def weather():
     else:
         longi = longi[2:7]
     url = "https://api.darksky.net/forecast/ec674134bed7c60466462a9b3adbaa66/" + lat + "," + longi
-    #weather = requests.get(url).json()
-    weatherInfo = url#json.dumps(weather["currently"], indent = 2)
+    weather = requests.get(url).json()
+    weatherInfo = json.dumps(weather["currently"], indent = 2)
     return render_template("weather.html", location=location, weatherInfo=weatherInfo)
