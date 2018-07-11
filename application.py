@@ -61,12 +61,50 @@ def logout():
 
 @app.route("/search/results", methods=["POST"])
 def results():
+    global userLoggedIn
     location = request.form.get("location").upper()
-    matches = db.execute("SELECT city FROM locations WHERE city = :loc OR zip = :loc;", {"loc": location}).fetchone()
-    if matches is None:
-        matches = db.execute("SELECT * FROM locations WHERE zip LIKE '%loc%' OR city LIKE '%loc%';", {"loc": location}).fetchall()
-    if matches is None:
+    matches=[]
+    matches = db.execute("SELECT city FROM locations WHERE zip LIKE ('%' || :loc || '%');", {'loc': location}).fetchall()
+    if len(matches) != 0:
+        matches = db.execute("SELECT state FROM locations WHERE zip LIKE ('%' || :loc || '%');", {'loc': location}).fetchall()
+        matchesZip = db.execute("SELECT zip FROM locations WHERE zip LIKE ('%' || :loc || '%');", {'loc': location}).fetchall()
+    if len(matches) == 0:
+        matches = db.execute("SELECT city FROM locations WHERE city LIKE ('%' || :loc || '%');", {'loc': location}).fetchall()
+        if len(matches) != 0:
+            stateMatches=db.execute("SELECT state FROM locations WHERE city LIKE ('%' || :loc || '%');", {'loc': location}).fetchall()
+            matchesZip = db.execute("SELECT zip FROM locations WHERE city LIKE ('%' || :loc || '%');", {'loc': location}).fetchall()
+    if len(matches) == 0:
+        matches = db.execute("SELECT city FROM locations WHERE city = :loc OR zip = :loc;", {"loc": location}).fetchone()
+        if len(matches) != 0:
+            stateMatches=db.execute("SELECT state FROM locations WHERE city = :loc OR zip = :loc;", {"loc": location}).fetchone()
+            matchesZip=db.execute("SELECT zip FROM locations WHERE city = :loc OR zip = :loc;", {"loc": location}).fetchone()
+    if len(matches) == 0:
         return render_template("error.html", message="Not a valid city or zipcode")
+
+    matchesZipSend = []
+    for match in matchesZip:
+        strMatch = str(match)
+        matchesZipSend.append(strMatch[2:(len(strMatch))-3])
+
+    matchesStateSend = []
+    for match in stateMatches:
+        strMatch = str(match)
+        matchesStateSend.append(strMatch[2:(len(strMatch))-3])
+
+    matchesSend = []
+    for match in matches:
+        currIndex = matches.index(match)
+        strMatch = str(match)
+        matchesSend.append(strMatch[2:(len(strMatch))-3] + ", " + matchesStateSend[currIndex] + ", " + matchesZipSend[currIndex])
+
+
+
+
+    return render_template("results.html", matches=matchesSend, userLoggedIn=userLoggedIn)
+
+@app.route("/search/weather/<string:location>", methods=["GET"])
+def weather(location):
+    location = location.split(",")[0]
     lat = str(db.execute("SELECT lat FROM locations WHERE city = :loc OR zip = :loc", {"loc": location}).fetchone())
     longi = str(db.execute("SELECT long FROM locations WHERE city = :loc OR zip = :loc", {"loc": location}).fetchone())
     if lat[2] == "-":
