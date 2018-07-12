@@ -45,14 +45,15 @@ def account():
     match = db.execute("SELECT * FROM userinfo WHERE uname = :uname AND pword = pword", {"uname": uname, "pword": pword}).fetchone()
     #checks if the username and password already exist in the database and returns an error if it does
     if match is not None:
-        return render_template("error.html", message="Username already exists. Please choose another")
+        return render_template("error.html", message="Username already exists. Please choose another",
+        goto= "/register", gototext="Back to Register")
     #adds the info the user has provided into the database
     db.execute("INSERT INTO userinfo (first, uname, pword) VALUES (:first, :uname, :pword)",
             {"first": first, "uname": uname, "pword": pword})
     #actually runs the code above
     db.commit()
     #renders the alert page with a message telling the user they were successful in making their account
-    return render_template("alert.html", message="Congrats on making your account!")
+    return render_template("alert.html", message="Congrats on making your account!", goto="/", gototext="Back to Login")
 
 @app.route("/dashboard", methods=["POST"])
 def login():
@@ -65,7 +66,7 @@ def login():
     match = db.execute("SELECT * FROM userinfo WHERE uname = :uname AND pword = :pword", {"uname": uname, "pword": pword}).fetchone()
     #checks if the username and password already exist in the database and returns an error if it does not
     if match is None:
-        return render_template("error.html", message="Wrong username or password")
+        return render_template("error.html", message="Wrong username or password", goto="/", gototext="Back to Login")
     #sets global variable 'userLoggedIn' to the user's username so it can be referenced later
     userLoggedIn=uname
     #renders the dashboard page once the user has logged in, and sends the variable 'userLoggedIn'
@@ -75,7 +76,7 @@ def login():
 def logout():
     global userLoggedIn
     #renders the alert page with a message telling the user they were successful in logging out of their account
-    return render_template("alert.html", message = " Thank you for visiting, " + userLoggedIn + "!")
+    return render_template("alert.html", message = " Thank you for visiting, " + userLoggedIn + "!", goto="/", gototext="Back to Home")
     #resets global variables
     userLoggedIn = ""
     currLocationID=""
@@ -97,8 +98,9 @@ def results():
         matches = db.execute("SELECT city, state, zip FROM locations WHERE city = :loc OR zip = :loc;", {"loc": location}).fetchone()
     # if, after going through all possible inputs, there are no matches in the database,
     #renders the error page telling the user that it was not a match with anything in the database
-    if len(matches) == 0:
-        return render_template("error.html", message="Not a valid city or zipcode")
+    if matches is None:
+        return render_template("error.html", message="Not a valid city or zipcode", goto="/",
+        gototext="Back to Home", userLoggedIn=userLoggedIn)
     #creates a list with readable matches by trimming the results
     #of the psql command ('matches') and inserting those values in a new list
     matchesSend = []
@@ -113,8 +115,42 @@ def results():
 def weather(location):
     global userLoggedIn
     global currLocationID
+    locationData = ""
+
     #gets the city from the variable 'location'
     location = location.split("'")[0]
+
+    #sets the variable 'cityId' to the id of the location with the same city in the locations database as the url
+    cityId = str(db.execute("SELECT id FROM locations WHERE city = :location;", {"location": location}).fetchone())
+    #checks if the zipcode has a corresponding id in the database, and returns an error if it does not
+    if cityId is None:
+        return jsonify({"error": "Invalid zipcode"}), 422
+    #trims the variable 'cityId' to use to select later
+    cityId = cityId[1:(len(cityId)-2)]
+
+    #sets the variables needed for the json information to the corresponding values based on the
+    #id of the location in the locations datatable stored in the variable 'cityId'
+    placeName = str(db.execute("SELECT city FROM locations WHERE id = :id;", {"id": cityId}).fetchone())
+    stateName = str(db.execute("SELECT state FROM locations WHERE id = :id;", {"id": cityId}).fetchone())
+    lat = str(db.execute("SELECT lat FROM locations WHERE id = :id;", {"id": cityId}).fetchone())
+    longi = str(db.execute("SELECT long FROM locations WHERE id = :id;", {"id": cityId}).fetchone())
+    zipCode = str(db.execute("SELECT zip FROM locations WHERE id = :id;", {"id": cityId}).fetchone())
+    pop = str(db.execute("SELECT pop FROM locations WHERE id = :id;", {"id": cityId}).fetchone())
+    #sets the variable 'checkIns' for the json information to the number of check ins of the location
+    # based on the id of the location in the checkins datatable stored in the variable 'cityId'
+    checkIns = str(db.execute("SELECT COUNT(comment) FROM checkins WHERE location = :id;", {"id": cityId}).fetchall())
+
+    #trims the variables that were just set to readable text
+    placeName = placeName[2:(len(placeName)-3)]
+    stateName = stateName[2:(len(stateName)-3)]
+    lat = lat[2:(len(lat)-3)]
+    longi = longi[2:(len(longi)-3)]
+    zipCode = zipCode[2:(len(zipCode)-3)]
+    pop = pop[2:(len(pop)-3)]
+    checkIns = checkIns[2:(len(checkIns)-3)]
+    #concatinates a string with all location info
+    locationData = placeName + ", " + stateName + ", " + zipCode + ", at " + lat + ", " + longi + " with a population of " + pop + " and " + checkIns + " check-ins."
+
     #sets the variable 'currLocationID' to the id of the city the user wanted
     currLocationID =str(db.execute("SELECT id FROM locations WHERE city = :city;",{"city": location}).fetchone())
 
@@ -147,7 +183,7 @@ def weather(location):
     hum = ("The Current Humidity is : " + str(100*(data['currently']['humidity']))+"%")
     #returns weather.html and sends the above variables
     return render_template("weather.html", location=location, summary=summary,
-    hum = hum, currTemp = currTemp, dp = dp, userLoggedIn=userLoggedIn)
+    hum = hum, currTemp = currTemp, dp = dp, userLoggedIn=userLoggedIn, locationData=locationData)
 
 @app.route("/search/weather/check-in/", methods=["POST"])
 def checkIn():
@@ -164,10 +200,10 @@ def checkIn():
         db.execute("INSERT INTO checkins (location, username, comment) VALUES (:x, :y, :z)", {"x": currLocationID, "y": userLoggedIn, "z": comment})
         db.commit()
         #renders the alert page with a message telling the user they were successful in making their comment
-        return render_template("alert.html", message="Your comment " + comment + " was added!")
+        return render_template("alert.html", message="Your comment " + comment + " was added!", goto="/", gototext="Back to Home")
     else:
         #renders the error page with a message telling the user they already made a comment about that location
-        return render_template("error.html", message="You've already made a comment about this location")
+        return render_template("error.html", message="You've already made a comment about this location", goto="/", gototext="Back to Home")
 
 @app.route("/api/<string:zip>")
 def zip_api(zip):

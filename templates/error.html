@@ -3,11 +3,13 @@
     Error
 {% endblock %}
 {% block body %}
-    <!--alert code referenced from https://v4-alpha.getbootstrap.com/components/alerts/-->
-    <div class="alert alert-danger">
-        <!--alerts user what happened with the variable 'message' from application.py-->
-        <strong>Error!</strong> {{ message }}
+    <div class="half-page">
+        <!--alert code referenced from https://v4-alpha.getbootstrap.com/components/alerts/-->
+        <div class="alert alert-danger">
+            <!--alerts user what happened with the variable 'message' from application.py-->
+            <strong>Error!</strong> {{ message }}
+        </div>
+        <!--link to given variable from application.py-->
+        <a href="{{ goto }}">{{ gototext }}</a>
     </div>
-    <!--link to log out and to homepage-->
-    <a href="{{ url_for('index') }}">Home</a>
 {% endblock %}

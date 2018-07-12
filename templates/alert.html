@@ -3,11 +3,12 @@
     Success!
 {% endblock %}
 {% block body %}
-    <!--alert code referenced from https://v4-alpha.getbootstrap.com/components/alerts/-->
-    <div class="alert alert-success" role="alert">
-        <!--alerts user what happened with the variable 'message' from application.py-->
-        <strong>Success!</strong> {{ message }}
+    <div class="half-page">
+        <!--alert code referenced from https://v4-alpha.getbootstrap.com/components/alerts/-->
+        <div class="alert alert-success" role="alert">
+            <!--alerts user what happened with the variable 'message' from application.py-->
+             <!--link to given variable from application.py-->
+            <p style="color:#00171F;"><strong>Success!</strong> {{ message }} <a style="color:#00171F;" href="{{ goto }}">{{ gototext }}</a></p>
+        </div>
     </div>
-    <!--link to log out and to homepage-->
-    <a href="{{ url_for('index') }}">Home</a>
 {% endblock %}

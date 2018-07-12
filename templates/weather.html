@@ -3,15 +3,24 @@
     Weather
 {% endblock %}
 {% block body %}
-    <!--link to log out and to homepage-->
-    <a href="{{ url_for('logout') }}">Logout</a>
+
+    <div style= "margin-right: 120px; float:right;">
+        <!--link to log out and to homepage-->
+        <p><a href="{{ url_for('logout') }}">Logout</a><p>
+    </div>
+    <div class="half-page">
     <!--Title introducing the weather info, accessing the variable 'location' from application.py-->
-    <h1>The Weather for {{ location }}</h1>
+    <h1 class="title">The Weather for {{ location }}:</h1>
     <!--weather info, accessing the variables from the 'weather' function in application.py-->
-    <p>{{ summary }}</p>
+    <p class="info"> {{ locationData }}</p>
+    <br>
+    <br>
+    <p class="info">{{ summary }}</p>
     <p>{{ currTemp }}</p>
     <p>{{ dp }}</p>
     <p>{{ hum }}</p>
+    <br>
+    <br>
     <!--Greets the user with their name, accessing the global variable from application.py-->
     <p>Hey, {{ userLoggedIn }}! Wanna make a comment about this location?</p>
     <!--form code referenced from https://getbootstrap.com/docs/4.0/components/forms/-->
@@ -25,4 +34,5 @@
               <button class="btn btn-primary">Check In</button>
           </div>
         </form>
+    </div>
 {% endblock %}
