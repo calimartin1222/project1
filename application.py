@@ -22,7 +22,7 @@ db = scoped_session(sessionmaker(bind=engine))
 @app.route("/")
 def index():
     userLoggedIn = ""
-    currLocationID=""
+    currLocationID= ""
     return render_template("index.html")
 
 @app.route("/register")
@@ -89,7 +89,9 @@ def results():
 def weather(location):
     global userLoggedIn
     global currLocationID
+
     location = location.split("'")[0]
+    currLocationID =str(db.execute("SELECT id FROM locations WHERE city = :city;",{"city": location}).fetchone())
     lat = str(db.execute("SELECT lat FROM locations WHERE city = :loc OR zip = :loc", {"loc": location}).fetchone())
     longi = str(db.execute("SELECT long FROM locations WHERE city = :loc OR zip = :loc", {"loc": location}).fetchone())
 
@@ -102,16 +104,15 @@ def weather(location):
     else:
         longi = longi[2:7]
     url = "https://api.darksky.net/forecast/ec674134bed7c60466462a9b3adbaa66/" + lat + "," + longi
-    currLocationID =str(db.execute("SELECT id FROM locations WHERE lat = :lat AND long = :longi",
-    {"lat": lat, "longi": longi}).fetchone())
+
     currLocationID = currLocationID[1:len(currLocationID)-2]
     weather = requests.get(url).json()
     res = requests.get(url)
     data = res.json()
-    summary = ("The Summary is : " + str(data['currently']['summary']))
-    currTemp = ("The Temperature is : " + str(data['currently']['temperature']))
-    dp = ("The Dew Point is : " + str(data['currently']['dewPoint']))
-    hum = ("Humidity is : " + str(100*(data['currently']['humidity'])))
+    summary = ("The Current Summary is : " + str(data['currently']['summary']))
+    currTemp = ("The Current Temperature is : " + str(data['currently']['temperature']))
+    dp = ("The Current Dew Point is : " + str(data['currently']['dewPoint']))
+    hum = ("The Current Humidity is : " + str(100*(data['currently']['humidity']))+"%")
     return render_template("weather.html", location=location, summary=summary,
     hum = hum, currTemp = currTemp, dp = dp, userLoggedIn=userLoggedIn)
 
@@ -140,7 +141,7 @@ def zip_api(zip):
     longi = str(db.execute("SELECT long FROM locations WHERE id = :id;", {"id": zipId}).fetchone())
     zipCode = str(db.execute("SELECT zip FROM locations WHERE id = :id;", {"id": zipId}).fetchone())
     pop = str(db.execute("SELECT pop FROM locations WHERE id = :id;", {"id": zipId}).fetchone())
-    checkIns = str(db.execute("SELECT COUNT(*) FROM checkins WHERE location = :id;", {"id": zipId}))
+    checkIns = str(db.execute("SELECT COUNT(comment) FROM checkins WHERE location = :id;", {"id": zipId}).fetchall())
 
     placeName = placeName[2:(len(placeName)-3)]
     stateName = stateName[2:(len(stateName)-3)]
