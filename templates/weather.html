@@ -5,7 +5,10 @@
 {% block body %}
     <a href="{{ url_for('logout') }}">Logout</a>
     <h1>The Weather for {{ location }}</h1>
-    <p>{{ weatherInfo }}</p>
+    <p>{{ summary }}</p>
+    <p>{{ currTemp }}</p>
+    <p>{{ dp }}</p>
+    <p>{{ hum }}</p>
     <p>Hey, {{ userLoggedIn }}! Wanna make a comment about this location?</p>
         <form action="{{ url_for('checkIn') }}" method="post">
           <div class="form-group">

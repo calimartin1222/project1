@@ -1,5 +1,5 @@
 import os
-from flask import Flask, session, render_template, request
+from flask import Flask, session, render_template, request, jsonify
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -102,20 +102,60 @@ def weather(location):
     else:
         longi = longi[2:7]
     url = "https://api.darksky.net/forecast/ec674134bed7c60466462a9b3adbaa66/" + lat + "," + longi
-    currLocationID =str(db.execute("SELECT id FROM locations WHERE lat = :lat AND long = :longi", {"lat": lat, "longi": longi}).fetchone())
+    currLocationID =str(db.execute("SELECT id FROM locations WHERE lat = :lat AND long = :longi",
+    {"lat": lat, "longi": longi}).fetchone())
     currLocationID = currLocationID[1:len(currLocationID)-2]
     weather = requests.get(url).json()
-    weatherInfo = json.dumps(weather["currently"], indent = 2)
-    return render_template("weather.html", location=location, weatherInfo=weatherInfo, userLoggedIn=userLoggedIn)
+    res = requests.get(url)
+    data = res.json()
+    summary = ("The Summary is : " + str(data['currently']['summary']))
+    currTemp = ("The Temperature is : " + str(data['currently']['temperature']))
+    dp = ("The Dew Point is : " + str(data['currently']['dewPoint']))
+    hum = ("Humidity is : " + str(100*(data['currently']['humidity'])))
+    return render_template("weather.html", location=location, summary=summary,
+    hum = hum, currTemp = currTemp, dp = dp, userLoggedIn=userLoggedIn)
+
 @app.route("/search/weather/check-in/", methods=["POST"])
 def checkIn():
     global userLoggedIn
     global currLocationID
     comment = request.form.get("comment")
-    check = db.execute("SELECT id FROM checkins WHERE location = :location OR username = :username;", {"location": currLocationID, "username": userLoggedIn}).fetchone()
-    if not check:
+    check=[]
+    check = db.execute("SELECT id FROM checkins WHERE location = :location AND username = :username;", {"location": currLocationID, "username": userLoggedIn}).fetchone()
+    if check is None:
         db.execute("INSERT INTO checkins (location, username, comment) VALUES (:x, :y, :z)", {"x": currLocationID, "y": userLoggedIn, "z": comment})
         db.commit()
+        return render_template("alert.html", message="Your comment " + comment + " was added!")
     else:
         return render_template("error.html", message="You've already made a comment about this location")
-    return render_template("alert.html", message="Your comment " + comment + " was added!")
+@app.route("/api/<string:zip>")
+def zip_api(zip):
+    zipId = str(db.execute("SELECT id FROM locations WHERE zip = :zip;", {"zip": zip}).fetchone())
+    if zipId is None:
+        return jsonify({"error": "Invalid zipcode"}), 422
+    zipId = zipId[1:(len(zipId)-2)]
+    placeName = str(db.execute("SELECT city FROM locations WHERE id = :id;", {"id": zipId}).fetchone())
+    stateName = str(db.execute("SELECT state FROM locations WHERE id = :id;", {"id": zipId}).fetchone())
+    lat = str(db.execute("SELECT lat FROM locations WHERE id = :id;", {"id": zipId}).fetchone())
+    longi = str(db.execute("SELECT long FROM locations WHERE id = :id;", {"id": zipId}).fetchone())
+    zipCode = str(db.execute("SELECT zip FROM locations WHERE id = :id;", {"id": zipId}).fetchone())
+    pop = str(db.execute("SELECT pop FROM locations WHERE id = :id;", {"id": zipId}).fetchone())
+    checkIns = str(db.execute("SELECT COUNT(*) FROM checkins WHERE location = :id;", {"id": zipId}))
+
+    placeName = placeName[2:(len(placeName)-3)]
+    stateName = stateName[2:(len(stateName)-3)]
+    lat = lat[2:(len(lat)-3)]
+    longi = longi[2:(len(longi)-3)]
+    zipCode = zipCode[2:(len(zipCode)-3)]
+    pop = pop[2:(len(pop)-3)]
+    checkIns = checkIns[2:(len(checkIns)-3)]
+
+    return jsonify({
+            "place_name": placeName,
+            "state": stateName,
+            "latitude": lat,
+            "longitude": longi,
+            "zip": zipCode,
+            "population": pop,
+            "check_ins": checkIns
+        })
