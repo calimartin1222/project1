@@ -3,10 +3,12 @@
     Results
 {% endblock %}
 {% block body %}
+    <!--link to log out and to homepage-->
     <a align="right" href="{{ url_for('logout') }}">Logout</a>
-    <h1>Hello, {{ userLoggedIn }}!</h1>
-    <h3>Possible Matches</h3>
-    <ul style="list-style-type: none">
+    <!--Greets the user with their name, accessing the global variable from application.py-->
+    <h1 class="title">Hello, {{ userLoggedIn }}! Here are the Possible Matches to Your Search:</h1>
+    <!--Creates an unordered list, by cycling through the list 'matches' from application.py-->
+    <ul style="list-style-type: none" class="info">
         {% for match in matches %}
             <li><a href= "weather/{{ match }}">{{ match }}</a></li>
         {% endfor %}

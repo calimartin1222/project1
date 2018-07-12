@@ -3,17 +3,21 @@
     Dashboard
 {% endblock %}
 {% block body %}
-    <a align="right" href="{{ url_for('logout') }}">Logout</a>
-    <h1>Hello, {{ userLoggedIn }}!</h1>
+    <!--link to log out and to homepage-->
+    <a href="{{ url_for('logout') }}">Logout</a>
 
-    <div class="half">
-        <form action="{{ url_for('results') }}" method="post" class="form-inline">
-            <div class="form-group">
-                <input class="form-control" name="location" text="text" placeholder="Enter a City or a Zipcode">
-            </div>
-            <div class="form-group">
-                <button class="btn btn-primary">Search!</button>
-            </div>
-        </form>
-    </div>
+    <!--Greets the user with their name, accessing the global variable from application.py-->
+    <h1 class="title">Hello, {{ userLoggedIn }}!</h1>
+
+    <!--form code referenced from https://getbootstrap.com/docs/4.0/components/forms/-->
+    <form action="{{ url_for('results') }}" method="post" class="form-inline">
+            <input id="searchBox" class="form-control" name="location"
+            text="text" placeholder="Enter a City or a Zipcode">
+        </div>
+        <div class="form-group">
+            <!--When this button is pressed, the info in the form will
+            be sent to the 'results' function in application.py-->
+            <button class="btn btn-info">Search!</button>
+        </div>
+    </form>
 {% endblock %}

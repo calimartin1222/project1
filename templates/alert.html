@@ -3,8 +3,11 @@
     Success!
 {% endblock %}
 {% block body %}
-<div class="alert alert-success" role="alert">
-    <strong>Success!</strong> {{ message }}
-</div>
-<a href="{{ url_for('index') }}">Home</a>
+    <!--alert code referenced from https://v4-alpha.getbootstrap.com/components/alerts/-->
+    <div class="alert alert-success" role="alert">
+        <!--alerts user what happened with the variable 'message' from application.py-->
+        <strong>Success!</strong> {{ message }}
+    </div>
+    <!--link to log out and to homepage-->
+    <a href="{{ url_for('index') }}">Home</a>
 {% endblock %}

@@ -3,16 +3,21 @@
     Home
 {% endblock %}
 {% block body %}
-    <form action="{{ url_for('login') }}" method="post" id="login">
-      <div class="form-group">
-        <input class="form-control" name="uname" placeholder="Username">
-      </div>
-      <div class="form-group">
-        <input class="form-control" name="pword" type="password" placeholder="Password">
-      </div>
-      <div class="form-group">
-          <button class="btn btn-primary">Login!</button>
-      </div>
-    </form>
-  <p>Don't have an account? <a href="{{ url_for('register') }}">Register here!</a></p>
+  <!--form code referenced from https://getbootstrap.com/docs/4.0/components/forms/-->
+  <form action="{{ url_for('login') }}" method="post" class="half-page">
+    <div class="form-group">
+      <input class="form-control" name="uname" placeholder="Username">
+    </div>
+    <div class="form-group">
+      <input class="form-control" name="pword" type="password" placeholder="Password">
+    </div>
+    <div class="form-group">
+        <!--When this button is pressed, the info in the form will
+            be sent to the 'login' function in application.py-->
+        <button class="btn btn-primary">Login!</button>
+    </div>
+    <!--link to register page if user doesn't have an account-->
+    <p>Don't have an account? <a href="{{ url_for('register') }}">Register here!</a></p>
+  </form>
+
 {% endblock %}

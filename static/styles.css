@@ -1,8 +1,50 @@
-h1{
-    color: green;
+/*global attribute*/
+body
+{
+    background-color: #2B303A;
 }
 
+/*any element with the tag <form>, class title, and class info will have a left margin of 120px*/
+form, .title, .info{
+    margin-left:120px;
+}
+
+/*any element with the class half-page will have a width of 50% of the page*/
+.half-page{
+    width: 50%;
+}
+
+/*any element with the tag <p> will have a sans-seirf font type and a font size of 18px*/
 p {
     font-family: sans-serif;
     font-size: 18px;
+}
+
+/*stylizes the bootstrap jumbotron*/
+#header{
+    padding:10px;
+    background-color:red;
+    color:white;
+}
+
+/*any text with the class title will have these attributes*/
+.title{
+    color: green;
+    font-size: 36px;
+    font-weight: bold;
+}
+
+/*sets the width of the search box on the dashboard page*/
+#searchBox{
+    width: 200px;
+}
+
+/*makes links not blue*/
+a {
+    color: white;
+}
+
+/*styles links so when the user hovers over them, they will have these attributes*/
+a:hover {
+    color: hotpink;
 }
